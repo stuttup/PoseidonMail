@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="switch_smtp"
+        android:summary="@string/switch_smtp_summary"
+        android:title="@string/switch_smtp_title" />
+    <EditTextPreference
+        android:defaultValue="smtp.gmail.com"
+        android:key="pref_key_host"
+        android:inputType="text"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_host_title"/>
+    <EditTextPreference
+        android:defaultValue="465"
+        android:key="pref_key_port"
+        android:inputType="number"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_port_title"/>
+    <EditTextPreference
+        android:defaultValue="rff"
+        android:key="pref_key_username"
+        android:inputType="textEmailAddress"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_username_title"/>
+    <EditTextPreference
+        android:defaultValue="M"
+        android:key="pref_key_password"
+        android:inputType="textPassword"
+        android:title="@string/pref_password_title"/>
+
+</PreferenceScreen>

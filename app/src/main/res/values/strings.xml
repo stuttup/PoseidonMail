@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Poseidon Mail</string>
+    <string name="action_settings">Settings</string>
+    <string name="switch_smtp_title">Use SMTP</string>
+    <string name="switch_smtp_summary">turn this option on or off</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="welcome_message">Welcome To Poseidon Mail!</string>
+    <string name="pref_host_title">SMTP server host name</string>
+    <string name="pref_port_title">SMTP server host port number</string>
+    <string name="pref_username_title">Email Address of Sender</string>
+    <string name="pref_password_title">Password of Sender</string>
+</resources>
