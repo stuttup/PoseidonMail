@@ -15,9 +15,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,29 +38,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final String fileContents = "{\n" +
-                "\"androidId\":\"75dc39513954b9dc\", \n" +
-                "\"installId\" : \"8a42bb3f-ea1b-46a0-ada9-751ae4f5e758\", \n" +
-                "\"timestamp\":\"1517482485\", \n" +
-                "\"patientFirstName\":\"JOHNNY\", \n" +
-                "\"patientLastName\":\"ZAZA\", \n" +
-                "\"gender\":\"0\", \n" +
-                "\"age\":\"29\", \n" +
-                "\"bodyType\":\"2\", \n" +
-                "\"complementaryInfo\":\"Just a test\", \n" +
-                "\"measures\":\n" +
-                "    [{\"timestamp\":\"144947928(........................................................................................)F0YT4NCiAgICAgICAgPC9FdmVudD4NCiAgICA8L0V2ZW50cz4NCjwvRUNHPg==\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"2\",\"source\":\"1\",\"value\":\"100\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"4\",\"source\":\"1\",\"value\":\"100\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"1\",\"source\":\"0\",\"value\":\"88\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"2\",\"source\":\"0\",\"value\":\"89\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"0\",\"source\":\"0\",\"value\":\"154\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"7\",\"source\":\"6\",\"value\":\"119\"},\n" +
-                "    {\"timestamp\":\"1449479280286\",\"type\":\"3\",\"source\":\"2\",\"value\":\"31.5\"}]\n" +
-                "}\n";
-
-        writeFileOnInternalStorage(getApplicationContext(),"myfile", fileContents);
-
+        createZip("myzip");
 
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -73,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            MailSender sender = new MailSender("", "");
-                            sender.sendMail( "cni@tentelemed.com", getFileStreamPath("myfile"));
+                            MailSender sender = new MailSender(_username, _password);
+                            sender.sendMail( "", getFileStreamPath("myzip"));
                         } catch (Exception e) {
                             Log.e("SendMail", e.getMessage(), e);
                         }
@@ -88,45 +76,56 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
 
-    public void writeFileOnInternalStorage(Context mcoContext,String sFileName, String sBody){
-        File file = new File(mcoContext.getFilesDir(),"mydir");
-        if(!file.exists()){
-            file.mkdir();
-        }
+    public  void createZip(String zipFileName)
+    {
+        byte[] buffer = new byte[1024];
+        String fileContents = "Hello world!";
+        FileOutputStream fos;
+        FileInputStream in;
 
-        try{
-            File gpxfile = new File(file, sFileName);
-            FileWriter writer = new FileWriter(gpxfile);
-            writer.append(sBody);
-            writer.flush();
-            writer.close();
+        try {
+            fos = openFileOutput(zipFileName, Context.MODE_PRIVATE);
+            fos.write(fileContents.getBytes());
+            fos.close();
 
-        }catch (Exception e){
+            ZipOutputStream zos = new ZipOutputStream(fos);
+            ZipEntry ze= new ZipEntry("poseidon");
+            zos.putNextEntry(ze);
+            in = (FileInputStream) getResources().openRawResource(R.raw.poseidon);
+
+            int len;
+            while ((len = in.read(buffer)) > 0) {
+                zos.write(buffer, 0, len);
+            }
+
+            in.close();
+            zos.closeEntry();
+
+            //remember close it
+            zos.close();
+
+            Log.i("MainActivity", "Zipping done");
+
+        } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
+
 }

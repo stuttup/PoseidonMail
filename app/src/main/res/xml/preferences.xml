@@ -23,7 +23,7 @@
         android:singleLine="true"
         android:title="@string/pref_port_title"/>
     <EditTextPreference
-        android:defaultValue="rff"
+        android:defaultValue="aa"
         android:key="pref_key_username"
         android:inputType="textEmailAddress"
         android:maxLines="1"
@@ -31,7 +31,7 @@
         android:singleLine="true"
         android:title="@string/pref_username_title"/>
     <EditTextPreference
-        android:defaultValue="M"
+        android:defaultValue="aa"
         android:key="pref_key_password"
         android:inputType="textPassword"
         android:title="@string/pref_password_title"/>

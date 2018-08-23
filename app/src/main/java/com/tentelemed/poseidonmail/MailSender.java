@@ -1,8 +1,11 @@
 package com.tentelemed.poseidonmail;
 
+import android.content.Context;
+import android.util.Log;
+
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,7 +48,7 @@ public class MailSender extends Authenticator {
         props.setProperty("mail.transport.protocol", "smtp");
         props.setProperty("mail.host", mailhost);
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", "465");
+        props.put("mail.smtp.port", "587");
         props.put("mail.smtp.socketFactory.port", "465");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.fallback", "false");
@@ -59,37 +62,27 @@ public class MailSender extends Authenticator {
     }
 
     public synchronized void sendMail(String recipients, File filename) throws Exception {
-        String body = "Hello from TTSA";
-        String sFileName = filename.getName();
+        // set message headers
         MimeMessage message = new MimeMessage(session);
-//        DataHandler handler = new DataHandler(new ByteArrayDataSource(body.getBytes(), "text/plain"));
         message.setSender(new InternetAddress(user));
         message.setFrom(new InternetAddress(user));
         message.setSubject("Testing Subject");
-
+        // add recipient or list of recipients
         if (recipients.indexOf(',') > 0)
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipients));
         else
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(recipients));
-
-//        BodyPart messageBodyPart = new MimeBodyPart();
-//        message.setText(body);
-//
-        Multipart multipart = new MimeMultipart();
-//        multipart.addBodyPart(messageBodyPart);
-
         // add attachement file
-       addAttachment(multipart, filename);
-
-//        message.setDataHandler(handler);
-
+        Multipart multipart = new MimeMultipart();
+        addAttachment(multipart, filename);
+        // Metadata. todo: check whether this is useful.
         MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
         mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
         mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
         mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
         mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
         mc.addMailcap("message/rfc822;; x-java-content- handler=com.sun.mail.handlers.message_rfc822");
-
+//      Set content of message
         message.setContent(multipart);
 
         Transport.send(message);
@@ -107,7 +100,16 @@ public class MailSender extends Authenticator {
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
 
+    private static void addAttachment(Multipart multipart, InputStream inputStream)
+    {
+        try {
+            BodyPart source = new MimeBodyPart(inputStream);
+            multipart.addBodyPart(source);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public class ByteArrayDataSource implements DataSource{
@@ -147,8 +149,6 @@ public class MailSender extends Authenticator {
         public OutputStream getOutputStream() throws IOException {
             throw new IOException("Not Supported");
         }
-
-
     }
 }
 
