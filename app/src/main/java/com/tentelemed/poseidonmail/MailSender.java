@@ -1,8 +1,5 @@
 package com.tentelemed.poseidonmail;
 
-import android.content.Context;
-import android.util.Log;
-
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,7 +28,8 @@ import javax.mail.internet.MimeMultipart;
 
 public class MailSender extends Authenticator {
 
-    private String mailhost = "smtp.gmail.com";
+    private String mailhost;
+    private String mailport;
     private String user;
     private String password;
     private Session session;
@@ -40,7 +38,9 @@ public class MailSender extends Authenticator {
         Security.addProvider(new JSSEProvider());
     }
 
-    public MailSender(String user, String password){
+    public MailSender(String mailhost, String  mailport, String user, String password){
+        this.mailhost = mailhost;
+        this.mailport = mailport;
         this.user = user;
         this.password = password;
 
@@ -48,7 +48,7 @@ public class MailSender extends Authenticator {
         props.setProperty("mail.transport.protocol", "smtp");
         props.setProperty("mail.host", mailhost);
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.port", mailport);
         props.put("mail.smtp.socketFactory.port", "465");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.fallback", "false");
@@ -150,5 +150,6 @@ public class MailSender extends Authenticator {
             throw new IOException("Not Supported");
         }
     }
+
 }
 

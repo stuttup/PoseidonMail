@@ -2,7 +2,7 @@
     <string name="app_name">Poseidon Mail</string>
     <string name="action_settings">Settings</string>
     <string name="switch_smtp_title">Use SMTP</string>
-    <string name="switch_smtp_summary">turn this option on or off</string>
+    <string name="switch_smtp_summary">turn this option on if you want to use to send your report via email</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

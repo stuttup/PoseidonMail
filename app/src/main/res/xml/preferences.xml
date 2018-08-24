@@ -6,7 +6,7 @@
         android:key="switch_smtp"
         android:summary="@string/switch_smtp_summary"
         android:title="@string/switch_smtp_title" />
-    <EditTextPreference
+    <android.support.v7.preference.EditTextPreference
         android:defaultValue="smtp.gmail.com"
         android:key="pref_key_host"
         android:inputType="text"
@@ -14,7 +14,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_host_title"/>
-    <EditTextPreference
+    <android.support.v7.preference.EditTextPreference
         android:defaultValue="465"
         android:key="pref_key_port"
         android:inputType="number"
@@ -22,7 +22,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_port_title"/>
-    <EditTextPreference
+    <android.support.v7.preference.EditTextPreference
         android:defaultValue="aa"
         android:key="pref_key_username"
         android:inputType="textEmailAddress"
@@ -30,7 +30,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_username_title"/>
-    <EditTextPreference
+    <android.support.v7.preference.EditTextPreference
         android:defaultValue="aa"
         android:key="pref_key_password"
         android:inputType="textPassword"

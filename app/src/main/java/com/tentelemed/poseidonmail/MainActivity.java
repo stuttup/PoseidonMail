@@ -15,21 +15,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class MainActivity extends AppCompatActivity {
+
+//    private String sharedPrefFile = "com.tentelemed.poseidonmailsharedprefs";
+    private String _username;
+    private String _password;
+    private String _hostname;
+    private String _port;
+    private Boolean _smtp;
+
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +41,16 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        createZip("myzip");
-
-
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean switchPref = sharedPref.getBoolean(SettingsActivity.KEY_PREF_SWITCH_SMTP, false);
-        final String _username = sharedPref.getString(SettingsActivity.KEY_PREF_USERNAME, "");
-        final String _password = sharedPref.getString(SettingsActivity.KEY_PREF_PASSWORD, "");
-        String _hostname = sharedPref.getString(SettingsActivity.KEY_PREF_HOST, "smtp.gmail.com");
-//        int _port = sharedPref.getInt(SettingsActivity.KEY_PREF_PORT, 465);
-        Toast.makeText(this, switchPref ? "SMTP configured" : "SMTP not configured", Toast.LENGTH_SHORT).show();
+        _smtp = sharedPref.getBoolean(SettingsActivity.KEY_PREF_SWITCH_SMTP, false);
+        _username = sharedPref.getString(SettingsActivity.KEY_PREF_USERNAME, "");
+        _password = sharedPref.getString(SettingsActivity.KEY_PREF_PASSWORD, "");
+        _hostname = sharedPref.getString(SettingsActivity.KEY_PREF_HOST, "smtp.gmail.com");
+        _port = sharedPref.getString(SettingsActivity.KEY_PREF_PORT, "465");
+        Toast.makeText(this, _smtp ? "SMTP configured" : "SMTP not configured", Toast.LENGTH_SHORT).show();
         Toast.makeText(this, "Mail to be send using credentials of " + _username, Toast.LENGTH_SHORT).show();
-
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -60,8 +59,9 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        createZip("myzip");
                         try {
-                            MailSender sender = new MailSender(_username, _password);
+                            MailSender sender = new MailSender(_hostname, _port, _username, _password);
                             sender.sendMail( "", getFileStreamPath("myzip"));
                         } catch (Exception e) {
                             Log.e("SendMail", e.getMessage(), e);
@@ -92,38 +92,57 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*@Override
+    protected void onPause(){
+        super.onPause();
+
+        SharedPreferences.Editor preferencesEditor = sharedPref.edit();
+        preferencesEditor.putBoolean(SettingsActivity.KEY_PREF_SWITCH_SMTP, _smtp);
+        preferencesEditor.putString(SettingsActivity.KEY_PREF_HOST, _hostname);
+        preferencesEditor.putString(SettingsActivity.KEY_PREF_PORT, _port);
+        preferencesEditor.putString(SettingsActivity.KEY_PREF_USERNAME, _username);
+        preferencesEditor.putString(SettingsActivity.KEY_PREF_PASSWORD, _password);
+        preferencesEditor.apply();
+    }*/
 
     public  void createZip(String zipFileName)
     {
         byte[] buffer = new byte[1024];
-        String fileContents = "Hello world!";
         FileOutputStream fos;
+        FileOutputStream originFile;
         FileInputStream in;
+        int res_id = getResources().getIdentifier("poseidon", "raw", getPackageName());
 
         try {
             fos = openFileOutput(zipFileName, Context.MODE_PRIVATE);
-            fos.write(fileContents.getBytes());
-            fos.close();
+            originFile = openFileOutput("poseidon", Context.MODE_PRIVATE);
+            InputStream _data = getResources().openRawResource(res_id);
+            int _chunk;
+            while ((_chunk = _data.read(buffer)) > 0) {
+                fos.write(buffer, 0, _chunk);
+                originFile.write(buffer, 0, _chunk);
+            }
+            File filesDir = getFilesDir();
+            File poseidon = new File(filesDir, "poseidon");
 
             ZipOutputStream zos = new ZipOutputStream(fos);
             ZipEntry ze= new ZipEntry("poseidon");
             zos.putNextEntry(ze);
-            in = (FileInputStream) getResources().openRawResource(R.raw.poseidon);
 
+            in = new FileInputStream(poseidon);
             int len;
             while ((len = in.read(buffer)) > 0) {
                 zos.write(buffer, 0, len);
+                Log.d("MainActivity", "writing new chunk");
             }
-
             in.close();
+
             zos.closeEntry();
-
-            //remember close it
+            //close it
             zos.close();
-
-            Log.i("MainActivity", "Zipping done");
-
-        } catch (Exception e) {
+            fos.close();
+            Log.d("MainActivity", "Zipping done");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
